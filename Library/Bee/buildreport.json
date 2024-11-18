@@ -1,0 +1,22 @@
+{
+"instructions_readme": "1) Open Chrome, 2) go to chrome://tracing, 3) click Load, 4) navigate to this file.",
+
+"traceEvents":[
+{ "pid": "Unity", "ph":"M", "name": "process_name", "args": {"name": "Unity"} },
+{ "pid": "Unity", "ph":"M", "name": "process_sort_index", "args": {"sort_index": -100} },
+{ "pid": "Unity", "tid": 1, "ph":"M", "name": "thread_name", "args": {"name": ""} },
+{ "pid": "Unity", "tid": 1,"ts": 309776166151.6,"dur": 5325092.1, "ph":"X", "name": "Build player"},
+{ "pid": "Unity", "tid": 1,"ts": 309776181907.2,"dur": 183762, "ph":"X", "name": "Preprocess Player"},
+{ "pid": "Unity", "tid": 1,"ts": 309780257873.1,"dur": 999.2, "ph":"X", "name": "Prepare For Build"},
+{ "pid": "Unity", "tid": 1,"ts": 309780258884,"dur": 1172776.9, "ph":"X", "name": "ProducePlayerScriptAssemblies"},
+{ "pid": "Unity", "tid": 1,"ts": 309781410031.6,"dur": 21428.4, "ph":"X", "name": "Prebuild Cleanup and Recompile"},
+{}
+
+],
+"meta_datetime": "12/29/2022 20:36:43",
+"meta_command_line": "\"C:\\Program Files\\Unity\\Hub\\Editor\\2021.3.9f1\\Editor\\Unity.exe\" -projectpath \"C:\\Users\\Kevin\\Desktop\\College\\Project\\My project\" -useHub -hubIPC -cloudEnvironment production -licensingIpc LicenseClient-Kevin -hubSessionId 895201f0-8559-11ed-afe4-4bdf3154e8a5",
+"meta_command_line_args": "C:\\Program Files\\Unity\\Hub\\Editor\\2021.3.9f1\\Editor\\Unity.exe -projectpath C:\\Users\\Kevin\\Desktop\\College\\Project\\My project -useHub -hubIPC -cloudEnvironment production -licensingIpc LicenseClient-Kevin -hubSessionId 895201f0-8559-11ed-afe4-4bdf3154e8a5",
+"meta_user_name": "Kevin",
+"meta_os_version": "Microsoft Windows NT 10.0.22000.0",
+"meta_cpu_count": "12"
+}
