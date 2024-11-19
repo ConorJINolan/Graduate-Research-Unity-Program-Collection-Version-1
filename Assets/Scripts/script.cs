@@ -15,8 +15,8 @@ public class script : MonoBehaviour
     public Text ForceDisplay;
     private int forceCount = 0;
     private List<Force> forceList;
-    public Force lowViscosity = new Force(0.5f, 0.5f, 0.5f, 10.0f, 0.2f, 0.0f, 0.0f, Vector3.zero, 0.0f, Vector3.zero, 0.0f, 0.0f);
-    public Force highViscosity = new Force(1.0f, 1.0f, 1.0f, 20.0f, 0.9f, 0.0f, 0.0f, Vector3.zero, 0.0f, Vector3.zero, 0.0f, 0.0f);
+    public Force lowViscosity = new Force(0.25f, 0.25f, 0.25f, 5.0f, 0.2f, 0.0f, 0.0f, Vector3.zero, 0.0f, Vector3.zero, 0.0f, 0.0f);
+    public Force highViscosity = new Force(1.0f, 1.0f, 1.0f, 20.0f, 0.95f, 0.0f, 0.0f, Vector3.zero, 0.0f, Vector3.zero, 0.0f, 0.0f);
 
     public int secondSet = 0; 
     // Remaining Systems
@@ -24,7 +24,7 @@ public class script : MonoBehaviour
     public GameObject SpawnSphere;
     public Transform SpawnedSphere;
     public Text XText, YText, ZText, AText, MText, Itr, NamedDisplay, IsRecording;
-    public Transform small, big;
+    public GameObject small, big;
     public Text timerText;
 
     public float rawtxtCheck = 0;
@@ -65,7 +65,7 @@ public class script : MonoBehaviour
     public float size = 1;
     float state = 0;
     float crcl = 0;
-
+    int repPart = 1;
     float xCheck = 0;
     float yCheck = 0;
     float zCheck = 0;
@@ -74,11 +74,14 @@ public class script : MonoBehaviour
     public float txtUpdateEnd = 0;
     public float rawtxtUpdateSrt = 0; 
     public float rawtxtUpdateEnd = 0;
+    public Vector3 tempPosition;
+    public Vector3 activePosition;
     void Start()
     {
         // Initialize UI and file listeners
         submitButton.onClick.AddListener(OnSubmit);
-
+        Vector3 tempPosition = small.transform.position;
+        Vector3 activePosition = big.transform.position;
         ShowNameScreen();
         UpdateCountDisplay();
 
@@ -724,20 +727,28 @@ private void ToggleRecording()
         }
         ClearSpawnedSpheres();
 
-        if (currentSet == 1)
-        {
-            RecordRep();
-            
-        }
-        else if (currentSet == 2)  // Second set (currentSet == 2)
-        {
-            secondSet += 1;  // Increment counter on each toggle when in the second set.
+        RecordRep();
 
-            if (secondSet == 3)  // After every 3rd toggle
-            {
-                RecordRep();  // Perform rep recording
-                secondSet = 0;  // Reset the counter after recording the rep
-            }
+        // Set the target position to (0, 0, 100)
+        Vector3 targetPosition = new Vector3(0, 0, 100);
+
+        // Switch the visibility and positions based on reps
+        if(repPart > 1) // For reps 2, 3, 4, 6, 7, 8, etc., small is active
+        {
+            big.SetActive(false);  // Hide big
+            small.SetActive(true);  // Show small
+            big.transform.position = targetPosition;  // Set big position to (0, 0, 100)
+            small.transform.position = targetPosition; // Set small position to (0, 0, 100)
+        }
+        else
+        {
+
+            big.SetActive(true);   // Show big
+            small.SetActive(false); // Hide small
+            big.transform.position = targetPosition;  // Set big position to (0, 0, 100)
+            small.transform.position = targetPosition; // Set small position to (0, 0, 100)
+
+
         }
     }
 }
@@ -777,28 +788,24 @@ public void CreateRawTextFile()
 private void RecordRep()
     {
        
-
         if (currentRep >= repsPerSet)
         {
-            currentRep = 0;
+            currentRep = 1;
             currentSet++;
-            if (currentSet > 1)
-            {
-                
-                    Vector3 tempPosition = small.transform.position;
-                    small.transform.position = big.transform.position;
-                    big.transform.position = tempPosition;
-
-                    angleChange = 300;
-            }
             if (currentSet > 2)
-            {
+            {   
+                repPart = 1;
                 ShowInstructionScreen("Program completed! Press any key to restart.");
                 ResetProgram();
                 return;
             }
         }
-        currentRep++;
+        repPart++;
+        if(repPart == 5)
+        {
+            currentRep++;
+            repPart = 1;
+        }
         UpdateCountDisplay();
         ShowInstructionScreen($"Set {currentSet} | Rep {currentRep} of {repsPerSet}\nPress Space to continue.");
     }
@@ -812,6 +819,7 @@ private void RecordRep()
     private void ResetProgram()
     {
         // Reset variables to initial states
+        Vector3 targetPosition = new Vector3(0, 0, 100);
         isProgramRunning = false;
         isRecording = false;
         currentRep = 0;  // Start from first rep
@@ -821,6 +829,10 @@ private void RecordRep()
         timeValue = 0;   // Reset time value
         isTimerRunning = false;  // Ensure timer stops until the first Space press
         secondSet = 0;
+        big.SetActive(true);   // Show big
+        small.SetActive(false); // Hide small
+        big.transform.position = targetPosition;  // Set big position to (0, 0, 100)
+        small.transform.position = targetPosition; // Set small position to (0, 0, 100)
 
         // Clear any previously generated data
         ClearSpawnedSpheres();
