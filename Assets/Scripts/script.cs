@@ -15,8 +15,10 @@ public class script : MonoBehaviour
     public Text ForceDisplay;
     private int forceCount = 0;
     private List<Force> forceList;
-    public Force lowViscosity = new Force(0.25f, 0.25f, 0.25f, 5.0f, 0.2f, 0.0f, 0.0f, Vector3.zero, 0.0f, Vector3.zero, 0.0f, 0.0f);
-    public Force highViscosity = new Force(1.0f, 1.0f, 1.0f, 20.0f, 0.95f, 0.0f, 0.0f, Vector3.zero, 0.0f, Vector3.zero, 0.0f, 0.0f);
+    public Force lowViscosity = new Force(0.25f, 0.25f, 0.25f, 5.0f, 0.2f, 0.0f, 0.0f, Vector3.zero, 0.0f, Vector3.zero, 0.0f, 0.5f);
+    public Force highViscosity = new Force(1.0f, 1.0f, 1.0f, 20.0f, 0.95f, 0.0f, 0.0f, Vector3.zero, 0.0f, Vector3.zero, 0.0f, 0.5f);
+    
+    public Force resetForce = new Force(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, Vector3.zero, 0.0f, Vector3.zero, 0.0f, 0.5f);
 
     public int secondSet = 0; 
     // Remaining Systems
@@ -76,8 +78,15 @@ public class script : MonoBehaviour
     public float rawtxtUpdateEnd = 0;
     public Vector3 tempPosition;
     public Vector3 activePosition;
+    // Buffer Values
+    private float spawnInterval = 0.1f; // Spawn every 0.5 seconds
+    private float spawnTimer = 0f;
+    private List<string> dataBuffer = new List<string>();
+    private float fileWriteInterval = 5f; // Write to file every 5 seconds
+    private float fileWriteTimer = 0f;
     void Start()
     {
+        ResetProgram();
         // Initialize UI and file listeners
         submitButton.onClick.AddListener(OnSubmit);
         Vector3 tempPosition = small.transform.position;
@@ -91,7 +100,7 @@ public class script : MonoBehaviour
     }
 
     void Update()
-    {
+    {   
         float XValue = transform.position.x;
         float YValue = transform.position.y;
         float ZValue = transform.position.z;
@@ -124,10 +133,24 @@ public class script : MonoBehaviour
             }
                 if (isRecording)
             {
-                // Instantiate the object each frame while recording is on
-                GameObject clone = Instantiate(SpawnSphere, new Vector3(transform.position.x, transform.position.y, 90), transform.rotation);
-                clone.transform.SetParent(SpawnedSphere);
-                CreateRawTextFile();
+                    spawnTimer += Time.deltaTime;
+                    CreateRawTextFile();
+                    if (spawnTimer >= spawnInterval)
+                    {
+                        spawnTimer = 0f;
+                        // Instantiate the object each frame while recording is on
+                        GameObject clone = Instantiate(SpawnSphere, new Vector3(transform.position.x, transform.position.y, 90), transform.rotation);
+                        clone.transform.SetParent(SpawnedSphere);
+                        dataBuffer.Add($"{ForceDisplay.text}\t{currentRep}\t{currentSet}\t{timerText.text}\t{XText.text}\t{YText.text}\t{ZText.text}\t{AText.text}\t{MText.text}");
+
+                        fileWriteTimer += Time.deltaTime;
+                        if (fileWriteTimer >= fileWriteInterval)
+                        {
+                            fileWriteTimer = 0f;
+                            WriteBufferedDataToFile();
+                        
+                        }
+                    }
             }
   
 
@@ -139,6 +162,14 @@ public class script : MonoBehaviour
             MagnitudesAngles(XValue, YValue);
         }
     }
+private void WriteBufferedDataToFile()
+{
+    if (dataBuffer.Count > 0)
+    {
+        File.AppendAllLines(txtDocumentName, dataBuffer);
+        dataBuffer.Clear();
+    }
+}
 void DisplayX(float XToDisplay)
 
     {
@@ -175,7 +206,7 @@ void DisplayX(float XToDisplay)
 
     }
 
-    void DisplayY(float YToDisplay)
+void DisplayY(float YToDisplay)
 
     {
 
@@ -444,7 +475,7 @@ void DisplayX(float XToDisplay)
 
     }
 
-    void DisplayZ(float ZToDisplay)
+void DisplayZ(float ZToDisplay)
 
     {
         /*
@@ -590,7 +621,7 @@ void MagnitudesAngles(float relativex,float relativey)
         // Hide name screen and start the program
         HideNameScreen();
         
-        ShowInstructionScreen("Pressing Spacebar will begin the recording of your rep.\n\n" + "Please take a minute to test the heft of the pen and prepare yourself.\n\n" + "Ensure you have a firm grip on the pen and are pressing both buttons.\n\n" + "Upon Completion of your rep, press Spacebar again.\n\n" + "Once all Reps have been completed return the pen to the inkwell.\n\n" + "Thank you for your compliance and participation!");
+        ShowInstructionScreenVoid();
     }
 
 public void CreateTextFile()
@@ -679,6 +710,10 @@ public void CreateTextFile()
     {
         instructionScreen.SetActive(true);
         instructionText.text = message;
+    }
+    public void ShowInstructionScreenVoid()
+    {
+        instructionScreen.SetActive(true);
     }
 
     private void ShowNameScreen()
@@ -862,10 +897,10 @@ private void RecordRep()
         lastNameInput.text = "";
 
         // Update the UI for name input screen
-        NamedDisplay.text = "Please enter your name to restart.";
+       NamedDisplay.text = ""; 
 
         // Display instructions for the user
-        ShowInstructionScreen("Enter your name to start a new session.");
+        DisplayForce("None");
         UpdateCountDisplay();
     }
 

@@ -1,4 +1,4 @@
-﻿// This code contains 3D SYSTEMS Confidential Information and is disclosed to you
+// This code contains 3D SYSTEMS Confidential Information and is disclosed to you
 // under a form of 3D SYSTEMS software license agreement provided separately to you.
 //
 // Notice
